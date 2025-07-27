@@ -23,7 +23,7 @@ def send_telegram(msg):
 
 def check_favoriti():
     try:
-        print("[*] Controllo match con quota < 1.70...")
+        print("[*] Controllo match con quota < 1.70 (nuovo HTML)...")
         res = requests.get(URL, headers=HEADERS)
         soup = BeautifulSoup(res.text, "html.parser")
         msg_lines = []
@@ -36,14 +36,13 @@ def check_favoriti():
 
                 p1 = match.select_one(".event__participant--home").text.strip()
                 p2 = match.select_one(".event__participant--away").text.strip()
-                odd1 = match.get("data-odd1")
-                odd2 = match.get("data-odd2")
 
-                if odd1 is None or odd2 is None:
+                quote_elements = match.select('[data-testid="wcl-oddsValue"]')
+                if len(quote_elements) < 2:
                     continue
 
-                o1 = float(odd1)
-                o2 = float(odd2)
+                o1 = float(quote_elements[0].text.strip())
+                o2 = float(quote_elements[1].text.strip())
 
                 if o1 < QUOTE_LIMIT or o2 < QUOTE_LIMIT:
                     msg_lines.append(f"🎾 {torneo}: {p1} ({o1}) vs {p2} ({o2})")
@@ -52,7 +51,8 @@ def check_favoriti():
                 continue
 
         if msg_lines:
-            full_msg = "📋 Match con favorito < 1.70: " + "\n".join(msg_lines)
+            full_msg = "📋 Match con favorito < 1.70:
+" + "\n".join(msg_lines)
             send_telegram(full_msg)
             print("[+] Notifica inviata")
         else:
@@ -63,9 +63,9 @@ def check_favoriti():
 
 @app.route("/")
 def home():
-    return "Bot aggiornato attivo."
+    return "Bot attivo con struttura HTML aggiornata."
 
 if __name__ == "__main__":
-    send_telegram("🔍 Bot avviato: ricerca favoriti < 1.70 (data-odd)")
+    send_telegram("🔍 Bot avviato (HTML nuovo): ricerca favoriti < 1.70")
     threading.Thread(target=check_favoriti, daemon=True).start()
     app.run(host="0.0.0.0", port=10000)
