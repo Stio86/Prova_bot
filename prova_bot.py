@@ -51,8 +51,7 @@ def check_favoriti():
                 continue
 
         if msg_lines:
-            full_msg = "📋 Match con favorito < 1.70:
-" + "\n".join(msg_lines)
+            full_msg = "📋 Match con favorito < 1.70: " + "\n".join(msg_lines)
             send_telegram(full_msg)
             print("[+] Notifica inviata")
         else:
