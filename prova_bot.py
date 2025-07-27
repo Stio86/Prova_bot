@@ -8,9 +8,8 @@ app = Flask(__name__)
 
 BOT_TOKEN = "7603257716:AAHYHZF8H6S-LyuXp8l-h1W0h40fSPp3WZU"
 CHAT_ID = "66336138"
-CHECK_INTERVAL = 300  # ogni 5 minuti
-QUOTE_LIMIT = 1.70
 HEADERS = {"User-Agent": "Mozilla/5.0"}
+SOFA_LIVE_URL = "https://api.sofascore.com/api/v1/sport/tennis/events/live"
 
 def send_telegram(msg):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -35,10 +34,9 @@ def get_quote(match_id):
     except:
         return None, None
 
-def check_matches():
+def check_all_matches():
     try:
-        print("[*] Controllo match Sofascore (quote via endpoint)...")
-        res = requests.get("https://api.sofascore.com/api/v1/sport/tennis/events/live", headers=HEADERS)
+        res = requests.get(SOFA_LIVE_URL, headers=HEADERS)
         data = res.json()
         msg_lines = []
 
@@ -53,27 +51,27 @@ def check_matches():
             away = event["awayTeam"]["name"]
 
             home_odd, away_odd = get_quote(match_id)
-            if home_odd is None or away_odd is None:
-                continue
 
-            if home_odd < QUOTE_LIMIT:
-                msg_lines.append(f"🎾 {category} {tournament}: {home} ({home_odd}) vs {away}")
-            elif away_odd < QUOTE_LIMIT:
-                msg_lines.append(f"🎾 {category} {tournament}: {home} vs {away} ({away_odd})")
+            msg = f"🎾 {category} {tournament}: {home} vs {away}"
+            if home_odd and away_odd:
+                msg += f" — Quote: {home} @ {home_odd}, {away} @ {away_odd}"
+            else:
+                msg += " — (quote non disponibili)"
+            msg_lines.append(msg)
 
         if msg_lines:
-            send_telegram("📋 Match con favorito < 1.70: " + "\n".join(msg_lines))
+            send_telegram("📋 Match ATP/WTA live trovati:" + "\n".join(msg_lines))
             print("[+] Notifica inviata.")
         else:
-            print("[!] Nessun favorito < 1.70 trovato.")
+            print("[!] Nessun match ATP/WTA live trovato.")
     except Exception as e:
         print(f"[Errore parsing Sofascore] {e}")
 
 @app.route("/")
 def home():
-    return "Bot Sofascore attivo (quote reali)."
+    return "Bot test Sofascore (tutti i match ATP/WTA live)."
 
 if __name__ == "__main__":
-    send_telegram("🔍 Bot avviato: quote pre-match da /event/{id}/odds/pre-match")
-    threading.Thread(target=check_matches, daemon=True).start()
+    send_telegram("🔍 Bot TEST avviato: tutti i match ATP/WTA live (con quote)")
+    threading.Thread(target=check_all_matches, daemon=True).start()
     app.run(host="0.0.0.0", port=10000)
