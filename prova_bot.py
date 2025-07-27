@@ -46,16 +46,13 @@ def check_favoriti_sofa():
                         home_odd = outcomes[0].get("value")
                         away_odd = outcomes[1].get("value")
                         if home_odd and home_odd < QUOTE_LIMIT:
-                            msg_lines.append(f"🎾 {category} {tournament}:
-{home} ({home_odd}) vs {away}")
+                            msg_lines.append(f"🎾 {category} {tournament}: {home} ({home_odd}) vs {away}")
                         elif away_odd and away_odd < QUOTE_LIMIT:
-                            msg_lines.append(f"🎾 {category} {tournament}:
-{home} vs {away} ({away_odd})")
+                            msg_lines.append(f"🎾 {category} {tournament}: {home} vs {away} ({away_odd})")
                     break
 
         if msg_lines:
-            send_telegram("📋 Match con favorito < 1.70:
-" + "\n".join(msg_lines))
+            send_telegram("📋 Match con favorito < 1.70: " + "\n".join(msg_lines))
             print("[+] Notifica inviata.")
         else:
             print("[!] Nessun favorito < 1.70 trovato.")
